@@ -79,14 +79,28 @@ export default function Home() {
                 </div>
             </div>
 
-            <div className="text-center">
-                <p className="text-phantom-purple-600 font-medium">
-                    🚀 Ready to revolutionize audio creation? Sprint 1 is underway!
-                </p>
-                <p className="text-gray-600 text-sm mt-2">
-                    Next: Supabase Auth, Audio Upload, and Dashboard
-                </p>
-            </div>
+                  <div className="text-center">
+        <p className="text-phantom-purple-600 font-medium">
+          🚀 Ready to revolutionize audio creation? Sprint 1 is underway!
+        </p>
+        <p className="text-gray-600 text-sm mt-2">
+          Next: Supabase Auth, Audio Upload, and Dashboard
+        </p>
+        <div className="mt-8 space-x-4">
+          <a
+            href="/signup"
+            className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-phantom-purple-600 hover:bg-phantom-purple-700"
+          >
+            Get Started
+          </a>
+          <a
+            href="/signin"
+            className="inline-flex items-center px-6 py-3 border border-phantom-purple-300 text-base font-medium rounded-md text-phantom-purple-700 bg-white hover:bg-phantom-purple-50"
+          >
+            Sign In
+          </a>
+        </div>
+      </div>
         </main>
     )
 } 
