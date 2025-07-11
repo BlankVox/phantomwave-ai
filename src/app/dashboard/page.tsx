@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { getCurrentUser, supabase } from '@/lib/supabase'
 
 export default function Dashboard() {
@@ -74,9 +75,12 @@ export default function Dashboard() {
                         </div>
                         <h3 className="text-lg font-medium text-gray-900 mb-2">No audio projects yet</h3>
                         <p className="text-gray-500 mb-4">Upload your first audio file to get started</p>
-                        <button className="px-4 py-2 bg-phantom-purple-600 text-white rounded-md hover:bg-phantom-purple-700 transition-colors">
-                            Upload Audio
-                        </button>
+                                    <Link 
+              href="/upload"
+              className="px-4 py-2 bg-phantom-purple-600 text-white rounded-md hover:bg-phantom-purple-700 transition-colors"
+            >
+              Upload Audio
+            </Link>
                     </div>
                 </div>
             </div>
