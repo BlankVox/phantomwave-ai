@@ -1,5 +1,6 @@
 'use client';
-export const dynamic = 'force-dynamic';
+
+import dynamic from 'next/dynamic';
 
 import React, { useState, useEffect } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
@@ -56,7 +57,7 @@ const mockProjects = [
     },
 ];
 
-const DashboardPage = () => {
+const DashboardPageImpl = () => {
     const [projects, setProjects] = useState(mockProjects);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
@@ -276,4 +277,4 @@ const DashboardPage = () => {
     );
 };
 
-export default DashboardPage; 
+export default dynamic(() => Promise.resolve(DashboardPageImpl), { ssr: false }); 
