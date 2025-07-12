@@ -5,7 +5,7 @@ import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { ProjectCard } from '@/components/projects/ProjectCard';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { SkeletonCard, SkeletonText } from '@/components/ui/Skeleton';
+import { SkeletonCard, SkeletonText, SkeletonButton } from '@/components/ui/Skeleton';
 import { useToast } from '@/components/ui/Toast';
 import Link from 'next/link';
 

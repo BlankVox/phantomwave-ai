@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { cn } from '@/lib/utils';
 import { Button } from './Button';
@@ -82,6 +82,11 @@ export const Toast: React.FC<ToastProps> = ({
         return () => clearTimeout(timer);
     }, []);
 
+    const handleClose = useCallback(() => {
+        setIsVisible(false);
+        setTimeout(() => onClose(id), 300);
+    }, [id, onClose]);
+
     useEffect(() => {
         if (duration === Infinity) return;
 
@@ -105,12 +110,7 @@ export const Toast: React.FC<ToastProps> = ({
         const animationId = requestAnimationFrame(updateProgress);
 
         return () => cancelAnimationFrame(animationId);
-    }, [duration]);
-
-    const handleClose = () => {
-        setIsVisible(false);
-        setTimeout(() => onClose(id), 300);
-    };
+    }, [duration, handleClose]);
 
     return (
         <div

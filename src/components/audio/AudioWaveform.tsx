@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { cn } from '@/lib/utils';
 
 interface AudioWaveformProps {
@@ -36,7 +36,7 @@ export const AudioWaveform: React.FC<AudioWaveformProps> = ({
 
     const data = waveformData || generateMockWaveform();
 
-    const drawWaveform = () => {
+    const drawWaveform = useCallback(() => {
         const canvas = canvasRef.current;
         if (!canvas) return;
 
@@ -109,7 +109,7 @@ export const AudioWaveform: React.FC<AudioWaveformProps> = ({
             ctx.stroke();
             ctx.setLineDash([]);
         }
-    };
+    }, [canvasRef, data, currentTime, duration, hoverTime, showProgress]);
 
     const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
         const canvas = canvasRef.current;
@@ -149,7 +149,7 @@ export const AudioWaveform: React.FC<AudioWaveformProps> = ({
 
     useEffect(() => {
         drawWaveform();
-    }, [data, currentTime, duration, hoverTime, showProgress]);
+    }, [drawWaveform]);
 
     return (
         <div className={cn('relative', className)}>
