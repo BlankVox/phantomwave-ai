@@ -1,5 +1,5 @@
 import { supabase } from './supabase'
-import { Project, UploadProgress, UploadResult } from '@/types/database'
+import { Project, UploadResult } from '@/types/database'
 
 const MAX_FILE_SIZE = 100 * 1024 * 1024 // 100MB
 const ALLOWED_TYPES = ['audio/mpeg', 'audio/wav', 'audio/mp3', 'audio/mp4']
@@ -18,8 +18,7 @@ export class UploadService {
     }
 
     static async uploadAudioFile(
-        file: File,
-        onProgress?: (progress: UploadProgress) => void
+        file: File
     ): Promise<UploadResult> {
         try {
             // Validate file
@@ -44,16 +43,7 @@ export class UploadService {
                 .from('audio-files')
                 .upload(filePath, file, {
                     cacheControl: '3600',
-                    upsert: false,
-                    onUploadProgress: (progress) => {
-                        if (onProgress) {
-                            onProgress({
-                                loaded: progress.loaded,
-                                total: progress.total,
-                                percentage: Math.round((progress.loaded / progress.total) * 100)
-                            })
-                        }
-                    }
+                    upsert: false
                 })
 
             if (error) {

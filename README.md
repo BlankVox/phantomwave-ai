@@ -24,16 +24,35 @@ Stop juggling between Dropbox, Audacity, Google Docs, and email threads. Phantom
 
 ## 🚧 Development Status
 
-Currently in Sprint 1 - Setting up foundation and authentication.
+✅ **Sprint 1** (W1-2): Repo setup, branding, Supabase Auth - **COMPLETE**
+✅ **Sprint 2** (W3-4): Audio upload & dashboard - **COMPLETE**
+
+Currently in Sprint 3 - Browser player & waveform trimming.
 
 ## 📋 Roadmap
 
-- **Sprint 1** (W1-2): Repo setup, branding, Supabase Auth
-- **Sprint 2** (W3-4): Audio upload & dashboard
-- **Sprint 3** (W5-6): Browser player & trimming
-- **Sprint 4** (W7-8): Whisper transcription
-- **Sprint 5** (W9-10): GPT-4 summaries & tagging
-- **Sprint 6** (W11-12): Stripe billing & share links
+- ✅ **Sprint 1** (W1-2): Repo setup, branding, Supabase Auth
+- ✅ **Sprint 2** (W3-4): Audio upload & dashboard
+- 🚧 **Sprint 3** (W5-6): Browser player & trimming
+- 📋 **Sprint 4** (W7-8): Whisper transcription
+- 📋 **Sprint 5** (W9-10): GPT-4 summaries & tagging
+- 📋 **Sprint 6** (W11-12): Stripe billing & share links
+
+## 🎵 How Audio Uploads Work
+
+### Upload Process
+1. **Authentication**: Users must be signed in to upload audio
+2. **File Validation**: Supports MP3/WAV files up to 100MB
+3. **Storage**: Files are uploaded to Supabase Storage in `audio-files` bucket
+4. **Metadata**: Project records are created in Supabase with title, file info, and status
+5. **Dashboard**: Users can view all their uploaded projects with file details
+
+### Features
+- **Drag & Drop**: Intuitive file upload with visual feedback
+- **Progress Tracking**: Real-time upload progress and status updates
+- **Project Management**: Organize audio files with custom titles
+- **File Information**: Display file size, creation date, and status
+- **Responsive Design**: Works on desktop and mobile devices
 
 ## 🛠 Getting Started
 
