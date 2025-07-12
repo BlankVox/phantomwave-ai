@@ -1,205 +1,278 @@
-'use client'
+'use client';
 
-import { useEffect, useState, useCallback } from 'react'
-import { useRouter } from 'next/navigation'
-import Link from 'next/link'
-import { getCurrentUser, supabase } from '@/lib/supabase'
-import { UploadService } from '@/lib/upload'
-import { Project } from '@/types/database'
-import { LoadingSpinner } from '@/components/ui'
+import React, { useState, useEffect } from 'react';
+import { DashboardLayout } from '@/components/layout/DashboardLayout';
+import { ProjectCard } from '@/components/projects/ProjectCard';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
+import { SkeletonCard, SkeletonText } from '@/components/ui/Skeleton';
+import { useToast } from '@/components/ui/Toast';
+import Link from 'next/link';
 
-// Force dynamic rendering
-export const dynamic = 'force-dynamic'
+// Mock data for demonstration
+const mockProjects = [
+    {
+        id: '1',
+        title: 'Interview with John Doe',
+        description: 'Product manager interview discussing Q4 strategy',
+        duration: 1800, // 30 minutes
+        fileSize: '15.2 MB',
+        uploadDate: '2024-01-15',
+        status: 'completed' as const,
+        transcription: 'This is a sample transcription of the interview with John Doe discussing the Q4 strategy and upcoming product launches. The conversation covers various aspects of the business including market analysis, competitor research, and team dynamics.',
+        tags: ['interview', 'strategy', 'product'],
+    },
+    {
+        id: '2',
+        title: 'Team Meeting Recording',
+        description: 'Weekly standup meeting with development team',
+        duration: 1200, // 20 minutes
+        fileSize: '12.8 MB',
+        uploadDate: '2024-01-14',
+        status: 'processing' as const,
+        tags: ['meeting', 'standup', 'development'],
+    },
+    {
+        id: '3',
+        title: 'Customer Feedback Session',
+        description: 'User research session with beta testers',
+        duration: 2400, // 40 minutes
+        fileSize: '18.5 MB',
+        uploadDate: '2024-01-13',
+        status: 'completed' as const,
+        transcription: 'Customer feedback session with beta testers revealed several key insights about user experience and feature requests. Participants provided valuable input on interface design and functionality.',
+        tags: ['feedback', 'research', 'beta'],
+    },
+    {
+        id: '4',
+        title: 'Board Presentation',
+        description: 'Quarterly board meeting presentation',
+        duration: 3600, // 60 minutes
+        fileSize: '25.1 MB',
+        uploadDate: '2024-01-12',
+        status: 'failed' as const,
+        tags: ['presentation', 'board', 'quarterly'],
+    },
+];
 
-export default function Dashboard() {
-    const [user, setUser] = useState<any>(null)
-    const [projects, setProjects] = useState<Project[]>([])
-    const [loading, setLoading] = useState(true)
-    const [projectsLoading, setProjectsLoading] = useState(true)
-    const router = useRouter()
+const DashboardPage = () => {
+    const [projects, setProjects] = useState(mockProjects);
+    const [loading, setLoading] = useState(true);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [statusFilter, setStatusFilter] = useState<'all' | 'completed' | 'processing' | 'failed'>('all');
+    const { toast } = useToast();
 
-    const checkUser = useCallback(async () => {
-        try {
-            const currentUser = await getCurrentUser()
-            if (!currentUser) {
-                router.push('/signin')
-                return
-            }
-            setUser(currentUser)
-        } catch (error) {
-            console.error('Error checking user:', error)
-            router.push('/signin')
-        } finally {
-            setLoading(false)
-        }
-    }, [router])
-
-    const fetchProjects = useCallback(async () => {
-        try {
-            setProjectsLoading(true)
-            const userProjects = await UploadService.getUserProjects()
-            setProjects(userProjects)
-        } catch (error) {
-            console.error('Error fetching projects:', error)
-        } finally {
-            setProjectsLoading(false)
-        }
-    }, [])
-
+    // Simulate loading
     useEffect(() => {
-        checkUser()
-    }, [checkUser])
+        const timer = setTimeout(() => setLoading(false), 1500);
+        return () => clearTimeout(timer);
+    }, []);
 
-    useEffect(() => {
-        if (user) {
-            fetchProjects()
-        }
-    }, [user, fetchProjects])
+    const handleDeleteProject = (id: string) => {
+        setProjects(prev => prev.filter(project => project.id !== id));
+    };
 
-    const handleSignOut = async () => {
-        try {
-            await supabase.auth.signOut()
-            router.push('/')
-        } catch (error) {
-            console.error('Error signing out:', error)
-        }
-    }
+    const handleEditProject = (id: string) => {
+        toast.info(`Editing project ${id}`);
+    };
 
-    const formatFileSize = (bytes: number) => {
-        if (bytes === 0) return '0 Bytes'
-        const k = 1024
-        const sizes = ['Bytes', 'KB', 'MB', 'GB']
-        const i = Math.floor(Math.log(bytes) / Math.log(k))
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
-    }
+    const handlePlayProject = (id: string) => {
+        toast.success(`Playing project ${id}`);
+    };
 
-    const formatDate = (dateString: string) => {
-        return new Date(dateString).toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        })
-    }
+    const filteredProjects = projects.filter(project => {
+        const matchesSearch = project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            project.description.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesStatus = statusFilter === 'all' || project.status === statusFilter;
+        return matchesSearch && matchesStatus;
+    });
+
+    const stats = {
+        total: projects.length,
+        completed: projects.filter(p => p.status === 'completed').length,
+        processing: projects.filter(p => p.status === 'processing').length,
+        failed: projects.filter(p => p.status === 'failed').length,
+    };
+
+    const totalDuration = projects
+        .filter(p => p.status === 'completed')
+        .reduce((acc, p) => acc + p.duration, 0);
+
+    const formatDuration = (seconds: number): string => {
+        const hours = Math.floor(seconds / 3600);
+        const minutes = Math.floor((seconds % 3600) / 60);
+        return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
+    };
 
     if (loading) {
         return (
-            <div className="min-h-screen flex items-center justify-center">
-                <LoadingSpinner size="lg" text="Loading..." />
-            </div>
-        )
+            <DashboardLayout>
+                <div className="space-y-6">
+                    <div className="flex items-center justify-between">
+                        <SkeletonText lines={1} className="w-48" />
+                        <SkeletonButton />
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        {Array.from({ length: 4 }).map((_, i) => (
+                            <SkeletonCard key={i} />
+                        ))}
+                    </div>
+                </div>
+            </DashboardLayout>
+        );
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-phantom-purple-50 to-wave-teal-50">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <DashboardLayout>
+            <div className="space-y-6">
                 {/* Header */}
-                <div className="flex justify-between items-center mb-8">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div>
-                        <h1 className="text-3xl font-bold text-phantom-purple-600">Dashboard</h1>
-                        <p className="text-gray-600 mt-2">Welcome back, {user?.email}</p>
+                        <h1 className="text-3xl font-bold text-white">Dashboard</h1>
+                        <p className="text-gray-400 mt-1">Manage your audio projects and analytics</p>
                     </div>
-                    <div className="flex gap-3">
-                        <Link
-                            href="/upload"
-                            className="px-4 py-2 bg-phantom-purple-600 text-white rounded-md hover:bg-phantom-purple-700 transition-colors"
+                    <Link href="/upload">
+                        <Button
+                            variant="primary"
+                            size="lg"
+                            leftIcon={
+                                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                                </svg>
+                            }
                         >
                             Upload Audio
-                        </Link>
-                        <button
-                            onClick={handleSignOut}
-                            className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
-                        >
-                            Sign Out
-                        </button>
-                    </div>
+                        </Button>
+                    </Link>
                 </div>
 
-                {/* Content */}
-                <div className="bg-white rounded-lg shadow-md p-6">
-                    <div className="flex justify-between items-center mb-6">
-                        <h2 className="text-xl font-semibold text-gray-900">Your Audio Projects</h2>
-                        <button
-                            onClick={fetchProjects}
-                            disabled={projectsLoading}
-                            className="text-phantom-purple-600 hover:text-phantom-purple-700 disabled:opacity-50"
-                        >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                {/* Statistics Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium text-gray-400">Total Projects</CardTitle>
+                            <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                             </svg>
-                        </button>
-                    </div>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold text-white">{stats.total}</div>
+                            <p className="text-xs text-gray-400">All time projects</p>
+                        </CardContent>
+                    </Card>
 
-                    {projectsLoading ? (
-                        <div className="text-center py-12">
-                            <LoadingSpinner text="Loading projects..." />
-                        </div>
-                    ) : projects.length === 0 ? (
-                        <div className="text-center py-12">
-                            <div className="text-gray-500 mb-4">
-                                <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
-                                </svg>
-                            </div>
-                            <h3 className="text-lg font-medium text-gray-900 mb-2">No audio projects yet</h3>
-                            <p className="text-gray-500 mb-4">Upload your first audio file to get started</p>
-                            <Link
-                                href="/upload"
-                                className="px-4 py-2 bg-phantom-purple-600 text-white rounded-md hover:bg-phantom-purple-700 transition-colors"
-                            >
-                                Upload Audio
-                            </Link>
-                        </div>
-                    ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {projects.map((project) => (
-                                <div key={project.id} className="bg-gray-50 rounded-lg p-6 border border-gray-200 hover:shadow-md transition-shadow">
-                                    <div className="flex items-start justify-between mb-4">
-                                        <div className="flex-1">
-                                            <h3 className="text-lg font-semibold text-gray-900 truncate" title={project.title}>
-                                                {project.title}
-                                            </h3>
-                                            <p className="text-sm text-gray-500 mt-1">{project.file_name}</p>
-                                        </div>
-                                        <div className="ml-4">
-                                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${project.status === 'ready'
-                                                    ? 'bg-green-100 text-green-800'
-                                                    : 'bg-yellow-100 text-yellow-800'
-                                                }`}>
-                                                {project.status}
-                                            </span>
-                                        </div>
-                                    </div>
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium text-gray-400">Completed</CardTitle>
+                            <svg className="h-4 w-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold text-green-400">{stats.completed}</div>
+                            <p className="text-xs text-gray-400">Successfully processed</p>
+                        </CardContent>
+                    </Card>
 
-                                    <div className="space-y-2 mb-4">
-                                        <div className="flex justify-between text-sm text-gray-600">
-                                            <span>File size:</span>
-                                            <span>{formatFileSize(project.file_size)}</span>
-                                        </div>
-                                        <div className="flex justify-between text-sm text-gray-600">
-                                            <span>Created:</span>
-                                            <span>{formatDate(project.created_at)}</span>
-                                        </div>
-                                    </div>
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium text-gray-400">Processing</CardTitle>
+                            <svg className="h-4 w-4 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold text-yellow-400">{stats.processing}</div>
+                            <p className="text-xs text-gray-400">Currently processing</p>
+                        </CardContent>
+                    </Card>
 
-                                    <div className="flex gap-2">
-                                        <button className="flex-1 px-3 py-2 bg-phantom-purple-600 text-white text-sm rounded-md hover:bg-phantom-purple-700 transition-colors">
-                                            Play
-                                        </button>
-                                        <button className="px-3 py-2 bg-gray-200 text-gray-700 text-sm rounded-md hover:bg-gray-300 transition-colors">
-                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    )}
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium text-gray-400">Total Duration</CardTitle>
+                            <svg className="h-4 w-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold text-cyan-400">{formatDuration(totalDuration)}</div>
+                            <p className="text-xs text-gray-400">Processed audio</p>
+                        </CardContent>
+                    </Card>
                 </div>
+
+                {/* Filters and Search */}
+                <div className="flex flex-col sm:flex-row gap-4">
+                    <div className="relative flex-1">
+                        <input
+                            type="text"
+                            placeholder="Search projects..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-white placeholder-gray-400 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+                        />
+                        <svg
+                            className="absolute right-3 top-2.5 h-4 w-4 text-gray-400"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </div>
+                    <div className="flex gap-2">
+                        {(['all', 'completed', 'processing', 'failed'] as const).map((status) => (
+                            <Button
+                                key={status}
+                                variant={statusFilter === status ? 'primary' : 'outline'}
+                                size="sm"
+                                onClick={() => setStatusFilter(status)}
+                            >
+                                {status.charAt(0).toUpperCase() + status.slice(1)}
+                            </Button>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Projects Grid */}
+                {filteredProjects.length === 0 ? (
+                    <Card className="text-center py-12">
+                        <CardContent>
+                            <svg className="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+                            </svg>
+                            <h3 className="text-lg font-medium text-white mb-2">No projects found</h3>
+                            <p className="text-gray-400 mb-4">
+                                {searchTerm || statusFilter !== 'all'
+                                    ? 'Try adjusting your search or filters'
+                                    : 'Get started by uploading your first audio file'
+                                }
+                            </p>
+                            {!searchTerm && statusFilter === 'all' && (
+                                <Link href="/upload">
+                                    <Button variant="primary">
+                                        Upload Audio
+                                    </Button>
+                                </Link>
+                            )}
+                        </CardContent>
+                    </Card>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {filteredProjects.map((project) => (
+                            <ProjectCard
+                                key={project.id}
+                                project={project}
+                                onDelete={handleDeleteProject}
+                                onEdit={handleEditProject}
+                                onPlay={handlePlayProject}
+                            />
+                        ))}
+                    </div>
+                )}
             </div>
-        </div>
-    )
-} 
+        </DashboardLayout>
+    );
+};
+
+export default DashboardPage; 

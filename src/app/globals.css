@@ -2,32 +2,246 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@layer base {
+    body {
+        @apply bg-bg-page text-text-body;
+        font-feature-settings: "rlig" 1, "calt" 1;
+    }
 
-:root {
-    --foreground-rgb: 0, 0, 0;
-    --background-start-rgb: 214, 219, 220;
-    --background-end-rgb: 255, 255, 255;
-}
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+        width: 8px;
+    }
 
-@media (prefers-color-scheme: dark) {
-    :root {
-        --foreground-rgb: 255, 255, 255;
-        --background-start-rgb: 0, 0, 0;
-        --background-end-rgb: 0, 0, 0;
+    ::-webkit-scrollbar-track {
+        @apply bg-bg-section;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        @apply bg-phantom-violet/50 rounded-full;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        @apply bg-phantom-violet/70;
+    }
+
+    /* Selection */
+    ::selection {
+        @apply bg-phantom-violet/30 text-text-primary;
+    }
+
+    /* Focus styles */
+    *:focus-visible {
+        @apply outline-none ring-2 ring-phantom-violet/50 ring-offset-2 ring-offset-bg-page;
+    }
+
+    /* Typography hierarchy */
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        @apply text-text-primary font-space;
+    }
+
+    h1 {
+        @apply text-4xl md:text-5xl font-bold;
+    }
+
+    h2 {
+        @apply text-3xl md:text-4xl font-semibold;
+    }
+
+    h3 {
+        @apply text-2xl md:text-3xl font-semibold;
+    }
+
+    p {
+        @apply text-text-body font-manrope;
     }
 }
 
-body {
-    color: rgb(var(--foreground-rgb));
-    background: linear-gradient(to bottom,
-            transparent,
-            rgb(var(--background-end-rgb))) rgb(var(--background-start-rgb));
-    font-family: 'Inter', system-ui, sans-serif;
+@layer components {
+
+    /* Card components */
+    .card-secondary {
+        @apply bg-bg-card border border-border-card rounded-2xl p-6 shadow-card;
+    }
+
+    /* Button components */
+    .btn-danger {
+        @apply bg-phantom-danger text-text-primary px-4 py-2 rounded-xl font-manrope font-medium transition-all duration-200 hover:bg-phantom-danger-light hover:shadow-lg;
+    }
+
+    /* Input components */
+    .input-primary {
+        @apply input-primary font-manrope w-full;
+    }
+
+    .input-error {
+        @apply border-phantom-danger text-phantom-danger;
+    }
+
+    /* Form components */
+    .form-label {
+        @apply text-text-muted font-manrope font-medium mb-2 block;
+    }
+
+    .form-error {
+        @apply text-phantom-danger text-sm font-manrope mt-1;
+    }
+
+    /* Modal components */
+    .modal-overlay {
+        @apply fixed inset-0 bg-black/60 backdrop-blur-sm z-50;
+    }
+
+    .modal-content {
+        @apply bg-bg-modal border border-border-card rounded-3xl shadow-modal p-6 max-w-md mx-auto mt-20;
+    }
+
+    /* Navigation components */
+    .nav-link {
+        @apply text-text-muted hover:text-text-primary transition-colors duration-200 font-manrope;
+    }
+
+    .nav-link-active {
+        @apply text-phantom-violet font-medium;
+    }
+
+    /* Status indicators */
+    .status-ready {
+        @apply bg-phantom-teal/20 text-phantom-teal border border-phantom-teal/30;
+    }
+
+    .status-processing {
+        @apply bg-phantom-violet/20 text-phantom-violet border border-phantom-violet/30;
+    }
+
+    .status-error {
+        @apply bg-phantom-danger/20 text-phantom-danger border border-phantom-danger/30;
+    }
+
+    /* Waveform visualization */
+    .waveform-container {
+        @apply relative overflow-hidden rounded-xl bg-bg-card;
+    }
+
+    .waveform-bar {
+        @apply bg-gradient-to-t from-phantom-violet to-phantom-teal rounded-full;
+    }
+
+    /* Loading states */
+    .loading-skeleton {
+        @apply bg-bg-hover animate-pulse rounded-lg;
+    }
+
+    /* Animated backgrounds */
+    .bg-gradient-hero {
+        background: linear-gradient(160deg, #7F5AF0 0%, #2CBFAE 100%);
+    }
+
+    .bg-gradient-card {
+        background: linear-gradient(135deg, #1B1B1D 0%, #121214 100%);
+    }
+
+    /* Glass effects */
+    .glass-card {
+        @apply glass rounded-2xl border border-white/10 shadow-card;
+    }
+
+    .glass-button {
+        @apply glass rounded-xl border border-white/20 px-4 py-2 transition-all duration-200 hover:border-white/30 hover:shadow-lg;
+    }
+
+    /* Animation keyframes */
+    @keyframes gradient-shift {
+        0% {
+            background-position: 0% 50%;
+        }
+
+        50% {
+            background-position: 100% 50%;
+        }
+
+        100% {
+            background-position: 0% 50%;
+        }
+    }
+
+    @keyframes loading-dots {
+
+        0%,
+        80%,
+        100% {
+            transform: scale(0);
+        }
+
+        40% {
+            transform: scale(1);
+        }
+    }
+
+    @keyframes shimmer {
+        0% {
+            background-position: -200% 0;
+        }
+
+        100% {
+            background-position: 200% 0;
+        }
+    }
 }
 
 @layer utilities {
-    .text-balance {
-        text-wrap: balance;
+
+    /* Text utilities */
+    .text-shadow {
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .text-shadow-lg {
+        text-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Glow effects */
+    .glow-violet {
+        box-shadow: 0 0 20px rgba(127, 90, 240, 0.3);
+    }
+
+    .glow-teal {
+        box-shadow: 0 0 20px rgba(44, 191, 174, 0.3);
+    }
+
+    .glow-danger {
+        box-shadow: 0 0 20px rgba(248, 113, 113, 0.3);
+    }
+
+    /* Hover effects */
+    .hover-lift {
+        @apply transition-all duration-300 hover:transform hover:scale-105 hover:-translate-y-1;
+    }
+
+    .hover-glow {
+        @apply transition-all duration-300 hover:shadow-lg hover:shadow-phantom-violet/25;
+    }
+
+    /* Spacing utilities */
+    .section-padding {
+        @apply py-16 px-4 sm:px-6 lg:px-8;
+    }
+
+    .container-max {
+        @apply max-w-7xl mx-auto;
+    }
+
+    /* Responsive utilities */
+    .mobile-only {
+        @apply block md:hidden;
+    }
+
+    .desktop-only {
+        @apply hidden md:block;
     }
 }

@@ -5,32 +5,25 @@ import './globals.css'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'PhantomWave.ai - Notion for Audio Creators',
-  description: 'Upload, trim, transcribe, summarize, and share your audio content in one unified workspace.',
-  keywords: 'audio, transcription, podcast, editing, workspace, AI',
-  authors: [{ name: 'PhantomWave.ai Team' }],
-  icons: {
-    icon: '/favicon.svg',
-  },
-  openGraph: {
-    title: 'PhantomWave.ai - Notion for Audio Creators',
-    description: 'Upload, trim, transcribe, summarize, and share your audio content in one unified workspace.',
-    type: 'website',
-  },
+  title: 'PhantomWave.ai - Audio Creation Workspace',
+  description: 'Upload, trim, transcribe, and share your audio content with AI-powered tools.',
 }
 
 export default function RootLayout({
-    children,
+  children,
 }: {
-    children: React.ReactNode
+  children: React.ReactNode
 }) {
-    return (
-        <html lang="en">
-            <body className={inter.className}>
-                <div className="min-h-screen bg-gradient-to-br from-phantom-purple-50 to-wave-teal-50">
-                    {children}
-                </div>
-            </body>
-        </html>
-    )
+  return (
+    <html lang="en" className="dark">
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Orbitron:wght@400;500;600;700;800;900&family=Manrope:wght@200;300;400;500;600;700;800&family=Inter:wght@100;200;300;400;500;600;700;800;900&family=Satoshi:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+      </head>
+      <body className={`${inter.className} bg-bg-page text-text-body antialiased`}>
+        {children}
+      </body>
+    </html>
+  )
 } 
